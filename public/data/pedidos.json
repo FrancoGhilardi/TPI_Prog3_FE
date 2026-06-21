@@ -2,7 +2,7 @@
   {
     "id": 1,
     "fecha": "2026-06-08",
-    "estado": "ENTREGADO",
+    "estado": "TERMINADO",
     "total": 9600,
     "formaPago": "TARJETA",
     "detalles": [
@@ -47,7 +47,7 @@
   {
     "id": 2,
     "fecha": "2026-06-09",
-    "estado": "EN_PREPARACION",
+    "estado": "CONFIRMADO",
     "total": 16400,
     "formaPago": "EFECTIVO",
     "detalles": [

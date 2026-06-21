@@ -1,0 +1,60 @@
+import type { ItemCarrito, Producto } from "../types/index.ts";
+
+const CART_KEY = "carrito";
+
+export function getCarrito(): ItemCarrito[] {
+  const raw = localStorage.getItem(CART_KEY);
+  if (!raw) return [];
+  try {
+    return JSON.parse(raw) as ItemCarrito[];
+  } catch {
+    return [];
+  }
+}
+
+function saveCarrito(items: ItemCarrito[]): void {
+  localStorage.setItem(CART_KEY, JSON.stringify(items));
+}
+
+export function agregarItem(producto: Producto, cantidad: number): void {
+  if (cantidad <= 0) throw new Error("Cantidad debe ser mayor a 0");
+  const items = getCarrito();
+  const existente = items.find((i) => i.producto.id === producto.id);
+  if (existente) {
+    const nueva = existente.cantidad + cantidad;
+    if (nueva > producto.stock)
+      throw new Error(`Stock insuficiente (máx ${producto.stock})`);
+    existente.cantidad = nueva;
+  } else {
+    if (cantidad > producto.stock)
+      throw new Error(`Stock insuficiente (máx ${producto.stock})`);
+    items.push({ producto, cantidad });
+  }
+  saveCarrito(items);
+}
+
+export function actualizarCantidad(id: number, cantidad: number): void {
+  if (cantidad <= 0) {
+    eliminarItem(id);
+    return;
+  }
+  const items = getCarrito();
+  const item = items.find((i) => i.producto.id === id);
+  if (!item) throw new Error("Producto no encontrado en carrito");
+  if (cantidad > item.producto.stock)
+    throw new Error(`Stock insuficiente (máx ${item.producto.stock})`);
+  item.cantidad = cantidad;
+  saveCarrito(items);
+}
+
+export function eliminarItem(id: number): void {
+  saveCarrito(getCarrito().filter((i) => i.producto.id !== id));
+}
+
+export function vaciarCarrito(): void {
+  localStorage.removeItem(CART_KEY);
+}
+
+export function contarItems(): number {
+  return getCarrito().reduce((acc, i) => acc + i.cantidad, 0);
+}
