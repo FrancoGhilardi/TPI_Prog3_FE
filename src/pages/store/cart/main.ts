@@ -8,14 +8,15 @@ import {
   contarItems,
 } from "../../../utils/cart.ts";
 import { ENVIO } from "../../../utils/config.ts";
-import { escapeHtml, safeImgSrc } from "../../../utils/index.ts";
+import { escapeHtml, safeImgSrc, formatARS } from "../../../utils/index.ts";
+import { ROUTES } from "../../../utils/routes.ts";
 import { getPedidosLocal, savePedidoLocal } from "../../../utils/api.ts";
-import type { ItemCarrito, Pedido, DetallePedido, FormaPago } from "../../../types/index.ts";
-
-const ROUTES = {
-  home: "/src/pages/store/home/index.html",
-  orders: "/src/pages/client/orders/index.html",
-};
+import type {
+  ItemCarrito,
+  Pedido,
+  DetallePedido,
+  FormaPago,
+} from "../../../types/index.ts";
 
 requireAuth();
 const usuario = getUsuarioActual()!;
@@ -32,10 +33,6 @@ function calcSubtotal(items: ItemCarrito[]): number {
   return items.reduce((acc, i) => acc + i.producto.precio * i.cantidad, 0);
 }
 
-function formatARS(n: number): string {
-  return n.toLocaleString("es-AR");
-}
-
 // --- Main render ---
 function render(): void {
   const items = getCarrito();
@@ -47,7 +44,7 @@ function render(): void {
       <!-- Header -->
       <header class="bg-white shadow-sm sticky top-0 z-40">
         <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
-          <a href="${ROUTES.home}" class="flex items-center gap-2 font-bold text-xl text-secondary hover:text-primary transition">
+          <a href="${ROUTES.storeHome}" class="flex items-center gap-2 font-bold text-xl text-secondary hover:text-primary transition">
             <span class="text-2xl">🍔</span>
             <span class="hidden sm:inline">Food Store</span>
           </a>
@@ -106,7 +103,9 @@ function render(): void {
             <div class="mb-6">
               <p class="text-sm font-medium text-secondary mb-2">Forma de pago <span class="text-red-500">*</span></p>
               <div class="grid grid-cols-3 gap-2" id="payment-group">
-                ${(["TARJETA", "TRANSFERENCIA", "EFECTIVO"] as FormaPago[]).map((fp) => `
+                ${(["TARJETA", "TRANSFERENCIA", "EFECTIVO"] as FormaPago[])
+                  .map(
+                    (fp) => `
                   <label class="payment-option cursor-pointer">
                     <input type="radio" name="formaPago" value="${fp}" class="sr-only" />
                     <div class="border-2 border-gray-200 rounded-xl p-3 text-center text-xs font-semibold text-secondary transition-colors hover:border-primary/50">
@@ -114,7 +113,9 @@ function render(): void {
                       ${fp === "TARJETA" ? "Tarjeta" : fp === "TRANSFERENCIA" ? "Transferencia" : "Efectivo"}
                     </div>
                   </label>
-                `).join("")}
+                `,
+                  )
+                  .join("")}
               </div>
               <p id="payment-error" class="text-xs text-red-500 mt-1 hidden">Seleccioná una forma de pago.</p>
             </div>
@@ -146,7 +147,7 @@ function renderEmpty(): string {
       <div class="text-7xl mb-5">🛒</div>
       <h2 class="text-xl font-bold text-secondary mb-2">Tu carrito está vacío</h2>
       <p class="text-muted text-sm mb-8">Agregá productos desde el catálogo.</p>
-      <a href="${ROUTES.home}" class="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary-dark text-white font-semibold rounded-xl transition-colors">
+      <a href="${ROUTES.storeHome}" class="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary-dark text-white font-semibold rounded-xl transition-colors">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
         </svg>
@@ -206,7 +207,7 @@ function renderCart(items: ItemCarrito[]): string {
           >
             Confirmar pedido
           </button>
-          <a href="${ROUTES.home}" class="mt-3 w-full py-2.5 border border-gray-200 text-secondary hover:bg-gray-50 font-medium rounded-xl transition-colors text-sm text-center block">
+          <a href="${ROUTES.storeHome}" class="mt-3 w-full py-2.5 border border-gray-200 text-secondary hover:bg-gray-50 font-medium rounded-xl transition-colors text-sm text-center block">
             Seguir comprando
           </a>
         </div>
@@ -265,7 +266,9 @@ function bindCartEvents(items: ItemCarrito[]): void {
     }
   });
 
-  document.getElementById("checkout-btn")!.addEventListener("click", openCheckoutModal);
+  document
+    .getElementById("checkout-btn")!
+    .addEventListener("click", openCheckoutModal);
 
   document.querySelectorAll("[data-item-id]").forEach((el) => {
     const id = Number((el as HTMLElement).dataset.itemId);
@@ -289,7 +292,9 @@ function bindCartEvents(items: ItemCarrito[]): void {
         actualizarCantidad(id, next);
         render();
       } catch {
-        document.getElementById(`stock-error-${id}`)?.classList.remove("hidden");
+        document
+          .getElementById(`stock-error-${id}`)
+          ?.classList.remove("hidden");
       }
     });
   });
@@ -322,24 +327,34 @@ function closeCheckoutModal(): void {
 }
 
 function bindCheckoutModal(items: ItemCarrito[]): void {
-  document.getElementById("modal-close")!.addEventListener("click", closeCheckoutModal);
+  document
+    .getElementById("modal-close")!
+    .addEventListener("click", closeCheckoutModal);
 
   document.getElementById("checkout-modal")!.addEventListener("click", (e) => {
     if (e.target === e.currentTarget) closeCheckoutModal();
   });
 
   // Payment option visual selection
-  document.querySelectorAll(".payment-option input[type='radio']").forEach((radio) => {
-    radio.addEventListener("change", () => {
-      document.querySelectorAll(".payment-option div").forEach((div) => {
-        div.classList.remove("border-primary", "bg-orange-50", "text-primary");
-        div.classList.add("border-gray-200");
+  document
+    .querySelectorAll(".payment-option input[type='radio']")
+    .forEach((radio) => {
+      radio.addEventListener("change", () => {
+        document.querySelectorAll(".payment-option div").forEach((div) => {
+          div.classList.remove(
+            "border-primary",
+            "bg-orange-50",
+            "text-primary",
+          );
+          div.classList.add("border-gray-200");
+        });
+        const label = (radio as HTMLInputElement)
+          .closest(".payment-option")!
+          .querySelector("div")!;
+        label.classList.remove("border-gray-200");
+        label.classList.add("border-primary", "bg-orange-50", "text-primary");
       });
-      const label = (radio as HTMLInputElement).closest(".payment-option")!.querySelector("div")!;
-      label.classList.remove("border-gray-200");
-      label.classList.add("border-primary", "bg-orange-50", "text-primary");
     });
-  });
 
   document.getElementById("checkout-form")!.addEventListener("submit", (e) => {
     e.preventDefault();
@@ -348,14 +363,22 @@ function bindCheckoutModal(items: ItemCarrito[]): void {
 }
 
 function submitCheckout(items: ItemCarrito[]): void {
-  const phoneInput = document.getElementById("checkout-phone") as HTMLInputElement;
+  const phoneInput = document.getElementById(
+    "checkout-phone",
+  ) as HTMLInputElement;
   const phoneError = document.getElementById("phone-error")!;
   const paymentError = document.getElementById("payment-error")!;
   const feedback = document.getElementById("checkout-feedback")!;
-  const confirmBtn = document.getElementById("confirm-btn") as HTMLButtonElement;
+  const confirmBtn = document.getElementById(
+    "confirm-btn",
+  ) as HTMLButtonElement;
 
   const phone = phoneInput.value.trim();
-  const selectedPayment = (document.querySelector("input[name='formaPago']:checked") as HTMLInputElement | null)?.value as FormaPago | undefined;
+  const selectedPayment = (
+    document.querySelector(
+      "input[name='formaPago']:checked",
+    ) as HTMLInputElement | null
+  )?.value as FormaPago | undefined;
 
   let valid = true;
 
@@ -400,11 +423,12 @@ function submitCheckout(items: ItemCarrito[]): void {
   vaciarCarrito();
 
   feedback.textContent = `Pedido #${pedido.id} confirmado. Redirigiendo...`;
-  feedback.className = "mb-4 px-4 py-3 rounded-xl text-sm font-medium bg-green-50 border border-green-200 text-green-700";
+  feedback.className =
+    "mb-4 px-4 py-3 rounded-xl text-sm font-medium bg-green-50 border border-green-200 text-green-700";
   feedback.classList.remove("hidden");
 
   setTimeout(() => {
-    window.location.href = ROUTES.orders;
+    window.location.href = ROUTES.clientOrders;
   }, 1200);
 }
 

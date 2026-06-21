@@ -3,14 +3,8 @@ import { requireAuth, logout, getUsuarioActual } from "../../../utils/auth.ts";
 import { getCategorias, getProductos } from "../../../utils/api.ts";
 import { contarItems } from "../../../utils/cart.ts";
 import { escapeHtml, safeImgSrc } from "../../../utils/index.ts";
+import { ROUTES } from "../../../utils/routes.ts";
 import type { Categoria, Producto } from "../../../types/index.ts";
-
-const ROUTES = {
-  login: "/src/pages/auth/login/index.html",
-  productDetail: "/src/pages/store/productDetail/index.html",
-  cart: "/src/pages/store/cart/index.html",
-  adminHome: "/src/pages/admin/adminHome/index.html",
-};
 
 requireAuth();
 
@@ -45,10 +39,14 @@ app.innerHTML = `
         </div>
 
         <div class="flex items-center gap-2">
-          ${usuario.rol === "ADMIN" ? `
+          ${
+            usuario.rol === "ADMIN"
+              ? `
           <a href="${ROUTES.adminHome}" class="hidden sm:flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium text-primary hover:bg-primary/10 transition">
             Admin
-          </a>` : ""}
+          </a>`
+              : ""
+          }
           <span class="hidden md:block text-sm text-muted">Hola, <strong class="text-secondary">${escapeHtml(usuario.nombre)}</strong></span>
           <a href="${ROUTES.cart}" class="relative p-2 rounded-xl hover:bg-orange-50 transition" aria-label="Carrito">
             <svg class="w-6 h-6 text-secondary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -98,7 +96,7 @@ app.innerHTML = `
           <h2 class="hidden lg:block font-bold text-secondary mb-3 text-sm uppercase tracking-wide">Categorías</h2>
           <nav id="categories-nav" class="space-y-1">
             <div class="animate-pulse space-y-2">
-              ${[1,2,3,4].map(() => `<div class="h-10 bg-gray-200 rounded-xl"></div>`).join("")}
+              ${[1, 2, 3, 4].map(() => `<div class="h-10 bg-gray-200 rounded-xl"></div>`).join("")}
             </div>
           </nav>
         </div>
@@ -121,7 +119,9 @@ app.innerHTML = `
         <!-- Product grid -->
         <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-5">
           <!-- skeleton -->
-          ${[1,2,3,4,5,6].map(() => `
+          ${[1, 2, 3, 4, 5, 6]
+            .map(
+              () => `
             <div class="bg-white rounded-2xl shadow-sm overflow-hidden animate-pulse">
               <div class="h-48 bg-gray-200"></div>
               <div class="p-4 space-y-2">
@@ -130,7 +130,9 @@ app.innerHTML = `
                 <div class="h-3 bg-gray-200 rounded w-2/3"></div>
               </div>
             </div>
-          `).join("")}
+          `,
+            )
+            .join("")}
         </div>
 
         <!-- Error state -->
@@ -174,8 +176,9 @@ function updateCartBadge(): void {
 
 // --- Filtering / sorting ---
 function getFilteredProducts(): Producto[] {
-  let result = allProducts
-    .filter((p) => p.disponible && !(p.eliminado ?? false));
+  let result = allProducts.filter(
+    (p) => p.disponible && !(p.eliminado ?? false),
+  );
 
   if (selectedCategoryId !== null) {
     result = result.filter((p) => p.categoria.id === selectedCategoryId);
@@ -220,21 +223,24 @@ function renderProducts(): void {
 
   emptyState.classList.add("hidden");
 
-  grid.innerHTML = filtered.map((p) => {
-    const imgSrc = safeImgSrc(p.imagen);
-    const nombre = escapeHtml(p.nombre);
-    const descripcion = p.descripcion ? escapeHtml(p.descripcion) : null;
-    const categoriaNombre = escapeHtml(p.categoria.nombre);
-    const precio = p.precio.toLocaleString("es-AR");
-    const imgTag = imgSrc
-      ? `<img src="${escapeHtml(imgSrc)}" alt="${nombre}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />`
-      : `<div class="w-full h-full flex items-center justify-center text-5xl">🍽️</div>`;
-    const badgeClass = p.disponible ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600";
-    const badgeText = p.disponible ? "Disponible" : "No disponible";
-    const descHtml = descripcion
-      ? `<p class="text-muted text-sm line-clamp-2 mb-3">${descripcion}</p>`
-      : `<div class="mb-3"></div>`;
-    return `
+  grid.innerHTML = filtered
+    .map((p) => {
+      const imgSrc = safeImgSrc(p.imagen);
+      const nombre = escapeHtml(p.nombre);
+      const descripcion = p.descripcion ? escapeHtml(p.descripcion) : null;
+      const categoriaNombre = escapeHtml(p.categoria.nombre);
+      const precio = p.precio.toLocaleString("es-AR");
+      const imgTag = imgSrc
+        ? `<img src="${escapeHtml(imgSrc)}" alt="${nombre}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />`
+        : `<div class="w-full h-full flex items-center justify-center text-5xl">🍽️</div>`;
+      const badgeClass = p.disponible
+        ? "bg-green-100 text-green-700"
+        : "bg-red-100 text-red-600";
+      const badgeText = p.disponible ? "Disponible" : "No disponible";
+      const descHtml = descripcion
+        ? `<p class="text-muted text-sm line-clamp-2 mb-3">${descripcion}</p>`
+        : `<div class="mb-3"></div>`;
+      return `
     <article
       class="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow overflow-hidden cursor-pointer group"
       data-id="${p.id}"
@@ -255,14 +261,8 @@ function renderProducts(): void {
         </div>
       </div>
     </article>`;
-  }).join("");
-
-  grid.querySelectorAll("article[data-id]").forEach((card) => {
-    card.addEventListener("click", () => {
-      const id = (card as HTMLElement).dataset.id;
-      window.location.href = `${ROUTES.productDetail}?id=${id}`;
-    });
-  });
+    })
+    .join("");
 }
 
 function renderCategories(): void {
@@ -273,28 +273,21 @@ function renderCategories(): void {
     ...categorias.map((c) => ({ id: c.id, nombre: c.nombre })),
   ];
 
-  nav.innerHTML = items.map((c) => {
-    const activeClass = selectedCategoryId === c.id
-      ? "bg-primary text-white"
-      : "text-secondary hover:bg-orange-50 hover:text-primary";
-    return `
+  nav.innerHTML = items
+    .map((c) => {
+      const activeClass =
+        selectedCategoryId === c.id
+          ? "bg-primary text-white"
+          : "text-secondary hover:bg-orange-50 hover:text-primary";
+      return `
     <button
       class="category-btn w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${activeClass}"
       data-category="${c.id ?? "all"}"
     >
       ${escapeHtml(c.nombre)}
     </button>`;
-  }).join("");
-
-  nav.querySelectorAll(".category-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const val = (btn as HTMLElement).dataset.category;
-      selectedCategoryId = val === "all" ? null : Number(val);
-      renderCategories();
-      renderProducts();
-      closeSidebar();
-    });
-  });
+    })
+    .join("");
 }
 
 // --- Sidebar (mobile) ---
@@ -310,9 +303,15 @@ function closeSidebar(): void {
   document.body.style.overflow = "";
 }
 
-document.getElementById("sidebar-toggle")!.addEventListener("click", openSidebar);
-document.getElementById("sidebar-close")!.addEventListener("click", closeSidebar);
-document.getElementById("sidebar-overlay")!.addEventListener("click", closeSidebar);
+document
+  .getElementById("sidebar-toggle")!
+  .addEventListener("click", openSidebar);
+document
+  .getElementById("sidebar-close")!
+  .addEventListener("click", closeSidebar);
+document
+  .getElementById("sidebar-overlay")!
+  .addEventListener("click", closeSidebar);
 
 // --- Search ---
 function bindSearch(id: string): void {
@@ -321,7 +320,8 @@ function bindSearch(id: string): void {
   input.addEventListener("input", () => {
     searchQuery = input.value.trim();
     // sync both inputs
-    const other = id === "search-input" ? "search-input-mobile" : "search-input";
+    const other =
+      id === "search-input" ? "search-input-mobile" : "search-input";
     const otherEl = document.getElementById(other) as HTMLInputElement | null;
     if (otherEl) otherEl.value = input.value;
     renderProducts();
@@ -337,6 +337,24 @@ document.getElementById("sort-select")!.addEventListener("change", (e) => {
   renderProducts();
 });
 
+// --- Event delegation ---
+document.getElementById("product-grid")!.addEventListener("click", (e) => {
+  const card = (e.target as Element).closest("article[data-id]");
+  if (!card) return;
+  const id = (card as HTMLElement).dataset.id;
+  window.location.href = `${ROUTES.productDetail}?id=${id}`;
+});
+
+document.getElementById("categories-nav")!.addEventListener("click", (e) => {
+  const btn = (e.target as Element).closest(".category-btn");
+  if (!btn) return;
+  const val = (btn as HTMLElement).dataset.category;
+  selectedCategoryId = val === "all" ? null : Number(val);
+  renderCategories();
+  renderProducts();
+  closeSidebar();
+});
+
 // --- Logout ---
 document.getElementById("logout-btn")!.addEventListener("click", logout);
 
@@ -350,7 +368,10 @@ async function loadData(): Promise<void> {
   errorState.classList.add("hidden");
 
   try {
-    [categorias, allProducts] = await Promise.all([getCategorias(), getProductos()]);
+    [categorias, allProducts] = await Promise.all([
+      getCategorias(),
+      getProductos(),
+    ]);
     renderCategories();
     renderProducts();
   } catch (err) {

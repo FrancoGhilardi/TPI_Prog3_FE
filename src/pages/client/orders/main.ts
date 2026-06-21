@@ -1,68 +1,20 @@
 import "../../../style.css";
 import { requireAuth, logout, getUsuarioActual } from "../../../utils/auth.ts";
 import { getPedidos, getPedidosLocal } from "../../../utils/api.ts";
-import { escapeHtml, safeImgSrc } from "../../../utils/index.ts";
-import type {
-  Pedido,
-  Estado,
-  DetallePedido,
-  FormaPago,
-} from "../../../types/index.ts";
-
-const ROUTES = {
-  home: "/src/pages/store/home/index.html",
-};
+import {
+  escapeHtml,
+  safeImgSrc,
+  formatARS,
+  formatFecha,
+  normalizeEstado,
+} from "../../../utils/index.ts";
+import { PAGO_LABEL, estadoBadge } from "../../../utils/orderStatus.ts";
+import { ROUTES } from "../../../utils/routes.ts";
+import type { Pedido, DetallePedido } from "../../../types/index.ts";
 
 requireAuth();
 const usuario = getUsuarioActual()!;
 const app = document.getElementById("app")!;
-
-// JSON puede traer estados no canónicos → normalizar
-function normalizeEstado(estado: string): Estado {
-  const map: Record<string, Estado> = {
-    EN_PREPARACION: "CONFIRMADO",
-    ENTREGADO: "TERMINADO",
-    PENDIENTE: "PENDIENTE",
-    CONFIRMADO: "CONFIRMADO",
-    TERMINADO: "TERMINADO",
-    CANCELADO: "CANCELADO",
-  };
-  return map[estado] ?? "PENDIENTE";
-}
-
-const BADGE_MAP: Record<Estado, { cls: string; label: string }> = {
-  PENDIENTE: { cls: "bg-yellow-100 text-yellow-700", label: "Pendiente" },
-  CONFIRMADO: { cls: "bg-blue-100 text-blue-700", label: "Confirmado" },
-  TERMINADO: { cls: "bg-green-100 text-green-700", label: "Terminado" },
-  CANCELADO: { cls: "bg-red-100 text-red-600", label: "Cancelado" },
-};
-
-const PAGO_LABEL: Record<FormaPago, string> = {
-  TARJETA: "💳 Tarjeta",
-  TRANSFERENCIA: "🏦 Transferencia",
-  EFECTIVO: "💵 Efectivo",
-};
-
-function estadoBadge(estado: Estado): string {
-  const { cls, label } = BADGE_MAP[estado] ?? BADGE_MAP.PENDIENTE;
-  return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${cls}">${label}</span>`;
-}
-
-function formatFecha(iso: string): string {
-  try {
-    return new Date(iso).toLocaleDateString("es-AR", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-  } catch {
-    return iso;
-  }
-}
-
-function formatARS(n: number): string {
-  return n.toLocaleString("es-AR");
-}
 
 // --- Render helpers ---
 
@@ -73,7 +25,7 @@ function renderEmpty(): string {
       <h2 class="text-xl font-bold text-secondary mb-2">No tenés pedidos todavía</h2>
       <p class="text-muted text-sm mb-8">Cuando hagas tu primer pedido, aparecerá aquí.</p>
       <a
-        href="${ROUTES.home}"
+        href="${ROUTES.storeHome}"
         class="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary-dark text-white font-semibold rounded-xl transition-colors"
       >
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -245,7 +197,7 @@ function renderPage(pedidos: Pedido[]): void {
       <!-- Header -->
       <header class="bg-white shadow-sm sticky top-0 z-40">
         <div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
-          <a href="${ROUTES.home}" class="flex items-center gap-2 font-bold text-xl text-secondary hover:text-primary transition">
+          <a href="${ROUTES.storeHome}" class="flex items-center gap-2 font-bold text-xl text-secondary hover:text-primary transition">
             <span class="text-2xl">🍔</span>
             <span class="hidden sm:inline">Food Store</span>
           </a>

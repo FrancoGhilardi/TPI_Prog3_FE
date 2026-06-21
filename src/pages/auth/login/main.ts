@@ -1,11 +1,6 @@
 import "../../../style.css";
 import { login, estaAutenticado, esAdmin } from "../../../utils/auth.ts";
-
-const ROUTES = {
-  adminHome: "/src/pages/admin/adminHome/index.html",
-  storeHome: "/src/pages/store/home/index.html",
-  register: "/src/pages/auth/register/index.html",
-};
+import { ROUTES } from "../../../utils/routes.ts";
 
 if (estaAutenticado()) {
   window.location.replace(esAdmin() ? ROUTES.adminHome : ROUTES.storeHome);

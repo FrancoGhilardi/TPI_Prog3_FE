@@ -1,13 +1,13 @@
 import "../../../style.css";
 import { getUsuarios } from "../../../utils/api.ts";
 import { loginDirecto, estaAutenticado, esAdmin } from "../../../utils/auth.ts";
+import { ROUTES } from "../../../utils/routes.ts";
+import {
+  validateRequired,
+  validateEmail,
+  validatePassword,
+} from "../../../utils/validation.ts";
 import type { UsuarioSesion } from "../../../types/index.ts";
-
-const ROUTES = {
-  adminHome: "/src/pages/admin/adminHome/index.html",
-  storeHome: "/src/pages/store/home/index.html",
-  login: "/src/pages/auth/login/index.html",
-};
 
 if (estaAutenticado()) {
   window.location.replace(esAdmin() ? ROUTES.adminHome : ROUTES.storeHome);
@@ -104,8 +104,6 @@ const passwordInput = document.getElementById("password") as HTMLInputElement;
 const errorMsg = document.getElementById("error-msg") as HTMLDivElement;
 const submitBtn = document.getElementById("submit-btn") as HTMLButtonElement;
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
 function showError(msg: string): void {
   errorMsg.textContent = msg;
   errorMsg.classList.remove("hidden");
@@ -129,18 +127,21 @@ form.addEventListener("submit", async (e) => {
   const email = emailInput.value.trim();
   const password = passwordInput.value;
 
-  if (!nombre) {
-    showError("El nombre es requerido.");
+  const errNombre = validateRequired(nombre, "El nombre");
+  if (errNombre) {
+    showError(errNombre);
     nombreInput.focus();
     return;
   }
-  if (!email || !EMAIL_RE.test(email)) {
-    showError("Ingresá un correo electrónico válido.");
+  const errEmail = validateEmail(email);
+  if (errEmail) {
+    showError(errEmail);
     emailInput.focus();
     return;
   }
-  if (password.length < 6) {
-    showError("La contraseña debe tener al menos 6 caracteres.");
+  const errPw = validatePassword(password);
+  if (errPw) {
+    showError(errPw);
     passwordInput.focus();
     return;
   }

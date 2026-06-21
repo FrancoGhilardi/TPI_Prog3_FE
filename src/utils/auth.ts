@@ -1,13 +1,9 @@
 import type { UsuarioSesion } from "../types/index.ts";
 import { getUsuarios } from "./api.ts";
+import { ROUTES } from "./routes.ts";
+import { MESSAGES } from "./messages.ts";
 
 const SESSION_KEY = "usuario_sesion";
-
-const ROUTES = {
-  login: "/src/pages/auth/login/index.html",
-  adminHome: "/src/pages/admin/adminHome/index.html",
-  storeHome: "/src/pages/store/home/index.html",
-} as const;
 
 export async function login(
   mail: string,
@@ -18,7 +14,7 @@ export async function login(
     (u) => u.mail === mail && u.password === password,
   );
   if (!usuario) {
-    throw new Error("Credenciales incorrectas");
+    throw new Error(MESSAGES.auth.credencialesIncorrectas);
   }
   const { password: _pw, ...sesion } = usuario;
   localStorage.setItem(SESSION_KEY, JSON.stringify(sesion));
@@ -56,12 +52,12 @@ export function requireAuth(rolRequerido?: "ADMIN" | "USUARIO"): UsuarioSesion {
   const usuario = getUsuarioActual();
   if (!usuario) {
     window.location.href = ROUTES.login;
-    throw new Error("No autenticado");
+    throw new Error(MESSAGES.auth.noAutenticado);
   }
   if (rolRequerido && usuario.rol !== rolRequerido) {
     window.location.href =
       usuario.rol === "ADMIN" ? ROUTES.adminHome : ROUTES.storeHome;
-    throw new Error("Acceso denegado");
+    throw new Error(MESSAGES.auth.accesoDenegado);
   }
   return usuario;
 }

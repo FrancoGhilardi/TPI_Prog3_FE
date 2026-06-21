@@ -3,12 +3,8 @@ import { requireAuth, logout } from "../../../utils/auth.ts";
 import { getProductos } from "../../../utils/api.ts";
 import { agregarItem, contarItems } from "../../../utils/cart.ts";
 import { escapeHtml, safeImgSrc } from "../../../utils/index.ts";
+import { ROUTES } from "../../../utils/routes.ts";
 import type { Producto } from "../../../types/index.ts";
-
-const ROUTES = {
-  home: "/src/pages/store/home/index.html",
-  cart: "/src/pages/store/cart/index.html",
-};
 
 requireAuth();
 
@@ -22,7 +18,7 @@ function renderShell(): void {
     <div class="min-h-screen bg-surface flex flex-col">
       <header class="bg-white shadow-sm sticky top-0 z-40">
         <div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
-          <a href="${ROUTES.home}" class="flex items-center gap-2 font-bold text-xl text-secondary hover:text-primary transition">
+          <a href="${ROUTES.storeHome}" class="flex items-center gap-2 font-bold text-xl text-secondary hover:text-primary transition">
             <span class="text-2xl">🍔</span>
             <span class="hidden sm:inline">Food Store</span>
           </a>
@@ -83,7 +79,7 @@ function renderProduct(p: Producto): void {
 
   main.innerHTML = `
     <div>
-      <a href="${ROUTES.home}" class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-primary transition mb-6">
+      <a href="${ROUTES.storeHome}" class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-primary transition mb-6">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
         </svg>
@@ -227,7 +223,7 @@ function renderError(msg: string): void {
     <div class="text-center py-20">
       <div class="text-5xl mb-4">⚠️</div>
       <p class="text-secondary font-medium mb-4">${escapeHtml(msg)}</p>
-      <a href="${ROUTES.home}" class="inline-block px-6 py-2 bg-primary text-white rounded-xl hover:bg-primary-dark transition font-medium text-sm">
+      <a href="${ROUTES.storeHome}" class="inline-block px-6 py-2 bg-primary text-white rounded-xl hover:bg-primary-dark transition font-medium text-sm">
         Volver al catálogo
       </a>
     </div>
