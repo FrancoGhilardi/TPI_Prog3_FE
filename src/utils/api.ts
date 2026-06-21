@@ -30,3 +30,21 @@ export async function getPedidos(): Promise<Pedido[]> {
   // futuro: fetch('/api/pedidos')
   return fetchJson<Pedido[]>(ENDPOINTS.pedidos);
 }
+
+const PEDIDOS_LOCAL_KEY = "pedidos_local";
+
+export function getPedidosLocal(): Pedido[] {
+  const raw = localStorage.getItem(PEDIDOS_LOCAL_KEY);
+  if (!raw) return [];
+  try {
+    return JSON.parse(raw) as Pedido[];
+  } catch {
+    return [];
+  }
+}
+
+export function savePedidoLocal(pedido: Pedido): void {
+  const pedidos = getPedidosLocal();
+  pedidos.push(pedido);
+  localStorage.setItem(PEDIDOS_LOCAL_KEY, JSON.stringify(pedidos));
+}
