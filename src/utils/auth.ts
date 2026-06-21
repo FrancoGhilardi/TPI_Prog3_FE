@@ -25,6 +25,10 @@ export async function login(
   return sesion;
 }
 
+export function loginDirecto(sesion: UsuarioSesion): void {
+  localStorage.setItem(SESSION_KEY, JSON.stringify(sesion));
+}
+
 export function getUsuarioActual(): UsuarioSesion | null {
   const raw = localStorage.getItem(SESSION_KEY);
   if (!raw) return null;
