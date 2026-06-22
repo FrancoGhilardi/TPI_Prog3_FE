@@ -45,7 +45,10 @@ app.innerHTML = `
           <a href="${ROUTES.adminHome}" class="hidden sm:flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium text-primary hover:bg-primary/10 transition">
             Admin
           </a>`
-              : ""
+              : `
+          <a href="${ROUTES.clientOrders}" class="hidden sm:flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium text-primary hover:bg-primary/10 transition">
+            Mis Pedidos
+          </a>`
           }
           <span class="hidden md:block text-sm text-muted">Hola, <strong class="text-secondary">${escapeHtml(usuario.nombre)}</strong></span>
           <a href="${ROUTES.cart}" class="relative p-2 rounded-xl hover:bg-orange-50 transition" aria-label="Carrito">
