@@ -1,6 +1,10 @@
 import "../../../style.css";
 import { requireAuth, getUsuarioActual } from "../../../utils/auth.ts";
-import { getProductos, getCategorias } from "../../../utils/api.ts";
+import {
+  getProductos,
+  getCategorias,
+  saveProductosLocal,
+} from "../../../utils/api.ts";
 import { escapeHtml, computeNextId } from "../../../utils/index.ts";
 import { renderAdminLayout, getAdminMain } from "../../../utils/adminLayout.ts";
 import { errorState, skeletonTable } from "../../../utils/ui.ts";
@@ -20,8 +24,6 @@ const app = document.getElementById("app")!;
 let productos: Producto[] = [];
 let categorias: Categoria[] = [];
 let nextId = 100;
-
-// ─── Layout ──────────────────────────────────────────────────────────────────
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -496,6 +498,7 @@ function openProdModal(prod: Producto | null): void {
       });
     }
 
+    saveProductosLocal(productos);
     close();
     renderTable();
   });
@@ -509,6 +512,7 @@ function confirmDelete(prod: Producto): void {
     `¿Eliminar <strong>${escapeHtml(prod.nombre)}</strong>?`,
     () => {
       productos = productos.filter((p) => p.id !== prod.id);
+      saveProductosLocal(productos);
       renderTable();
     },
   );

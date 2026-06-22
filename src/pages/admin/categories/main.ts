@@ -1,6 +1,6 @@
 import "../../../style.css";
 import { requireAuth, getUsuarioActual } from "../../../utils/auth.ts";
-import { getCategorias } from "../../../utils/api.ts";
+import { getCategorias, saveCategoriasLocal } from "../../../utils/api.ts";
 import { escapeHtml, computeNextId } from "../../../utils/index.ts";
 import { renderAdminLayout, getAdminMain } from "../../../utils/adminLayout.ts";
 import { errorState, skeletonTable } from "../../../utils/ui.ts";
@@ -318,6 +318,7 @@ function openCatModal(cat: Categoria | null): void {
       categorias.push({ id: nextId++, nombre, descripcion, imagen });
     }
 
+    saveCategoriasLocal(categorias);
     close();
     renderTable();
   });
@@ -331,6 +332,7 @@ function confirmDelete(cat: Categoria): void {
     `¿Eliminar <strong>${escapeHtml(cat.nombre)}</strong>?`,
     () => {
       categorias = categorias.filter((c) => c.id !== cat.id);
+      saveCategoriasLocal(categorias);
       renderTable();
     },
   );

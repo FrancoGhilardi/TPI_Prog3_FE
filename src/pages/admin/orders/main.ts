@@ -1,6 +1,10 @@
 import "../../../style.css";
 import { requireAuth, getUsuarioActual } from "../../../utils/auth.ts";
-import { getPedidos, getPedidosLocal } from "../../../utils/api.ts";
+import {
+  getPedidos,
+  getPedidosLocal,
+  upsertPedidoLocal,
+} from "../../../utils/api.ts";
 import {
   escapeHtml,
   formatFecha,
@@ -300,6 +304,7 @@ function openDetailModal(pedido: Pedido): void {
     const idx = pedidos.findIndex((p) => p.id === pedido.id);
     if (idx !== -1) {
       pedidos[idx] = { ...pedidos[idx]!, estado: nuevoEstado };
+      upsertPedidoLocal(pedidos[idx]!);
     }
     closeModal();
     renderCards();

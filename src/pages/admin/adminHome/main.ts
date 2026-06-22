@@ -1,6 +1,11 @@
 import "../../../style.css";
 import { requireAuth, getUsuarioActual } from "../../../utils/auth.ts";
-import { getCategorias, getProductos, getPedidos } from "../../../utils/api.ts";
+import {
+  getCategorias,
+  getProductos,
+  getPedidos,
+  getPedidosLocal,
+} from "../../../utils/api.ts";
 import { normalizeEstado } from "../../../utils/index.ts";
 import { ESTADO_META } from "../../../utils/orderStatus.ts";
 import { renderAdminLayout, getAdminMain } from "../../../utils/adminLayout.ts";
@@ -100,7 +105,7 @@ function renderDashboardContent(
                   <span class="text-sm font-semibold text-secondary">${count}</span>
                 </div>
                 <div class="w-full bg-gray-100 rounded-full h-1.5">
-                  <div class="h-1.5 rounded-full ${badgeCls.split(" ")[0].replace("bg-", "bg-").replace("100", "400")}" style="width: ${pct}%"></div>
+                  <div class="h-1.5 rounded-full ${ESTADO_META[estado].barCls}" style="width: ${pct}%"></div>
                 </div>
               </div>
             `;
@@ -134,16 +139,18 @@ async function loadData(): Promise<void> {
   getAdminMain().innerHTML = skeletonContent();
 
   try {
-    const [categorias, productos, pedidosRaw] = await Promise.all([
+    const [categorias, productos, jsonPedidos] = await Promise.all([
       getCategorias(),
       getProductos(),
       getPedidos(),
     ]);
 
-    const pedidos = pedidosRaw.map((p) => ({
-      ...p,
-      estado: normalizeEstado(p.estado as string),
-    }));
+    const localPedidos = getPedidosLocal();
+    const byId = new Map<number, (typeof jsonPedidos)[0]>();
+    [...jsonPedidos, ...localPedidos].forEach((p) => {
+      byId.set(p.id, { ...p, estado: normalizeEstado(p.estado as string) });
+    });
+    const pedidos = [...byId.values()];
 
     const totalCats = categorias.length;
     const catsActivas = categorias.filter(
