@@ -1,5 +1,6 @@
 import type { Categoria, Producto, Usuario, Pedido } from "../types/index.ts";
 import { ENDPOINTS } from "./config.ts";
+import { getStorageJson, setStorageJson } from "./index.ts";
 
 async function fetchJson<T>(url: string): Promise<T> {
   const response = await fetch(url);
@@ -14,38 +15,26 @@ async function fetchJson<T>(url: string): Promise<T> {
 const CATEGORIAS_LOCAL_KEY = "categorias_local";
 
 export function saveCategoriasLocal(categorias: Categoria[]): void {
-  localStorage.setItem(CATEGORIAS_LOCAL_KEY, JSON.stringify(categorias));
+  setStorageJson(CATEGORIAS_LOCAL_KEY, categorias);
 }
 
 export async function getCategorias(): Promise<Categoria[]> {
   // futuro: fetch('/api/categorias')
-  const raw = localStorage.getItem(CATEGORIAS_LOCAL_KEY);
-  if (raw) {
-    try {
-      return JSON.parse(raw) as Categoria[];
-    } catch {
-      /* fall through to JSON */
-    }
-  }
+  const cached = getStorageJson<Categoria[] | null>(CATEGORIAS_LOCAL_KEY, null);
+  if (cached) return cached;
   return fetchJson<Categoria[]>(ENDPOINTS.categorias);
 }
 
 const PRODUCTOS_LOCAL_KEY = "productos_local";
 
 export function saveProductosLocal(productos: Producto[]): void {
-  localStorage.setItem(PRODUCTOS_LOCAL_KEY, JSON.stringify(productos));
+  setStorageJson(PRODUCTOS_LOCAL_KEY, productos);
 }
 
 export async function getProductos(): Promise<Producto[]> {
   // futuro: fetch('/api/productos')
-  const raw = localStorage.getItem(PRODUCTOS_LOCAL_KEY);
-  if (raw) {
-    try {
-      return JSON.parse(raw) as Producto[];
-    } catch {
-      /* fall through to JSON */
-    }
-  }
+  const cached = getStorageJson<Producto[] | null>(PRODUCTOS_LOCAL_KEY, null);
+  if (cached) return cached;
   return fetchJson<Producto[]>(ENDPOINTS.productos);
 }
 
@@ -62,19 +51,13 @@ export async function getPedidos(): Promise<Pedido[]> {
 const PEDIDOS_LOCAL_KEY = "pedidos_local";
 
 export function getPedidosLocal(): Pedido[] {
-  const raw = localStorage.getItem(PEDIDOS_LOCAL_KEY);
-  if (!raw) return [];
-  try {
-    return JSON.parse(raw) as Pedido[];
-  } catch {
-    return [];
-  }
+  return getStorageJson<Pedido[]>(PEDIDOS_LOCAL_KEY, []);
 }
 
 export function savePedidoLocal(pedido: Pedido): void {
   const pedidos = getPedidosLocal();
   pedidos.push(pedido);
-  localStorage.setItem(PEDIDOS_LOCAL_KEY, JSON.stringify(pedidos));
+  setStorageJson(PEDIDOS_LOCAL_KEY, pedidos);
 }
 
 export function upsertPedidoLocal(pedido: Pedido): void {
@@ -85,5 +68,5 @@ export function upsertPedidoLocal(pedido: Pedido): void {
   } else {
     pedidos.push(pedido);
   }
-  localStorage.setItem(PEDIDOS_LOCAL_KEY, JSON.stringify(pedidos));
+  setStorageJson(PEDIDOS_LOCAL_KEY, pedidos);
 }

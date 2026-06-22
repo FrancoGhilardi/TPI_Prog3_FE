@@ -56,3 +56,28 @@ export function safeImgSrc(url: string | undefined): string | null {
     return null;
   }
 }
+
+export function getStorageJson<T>(key: string, fallback: T): T {
+  const raw = localStorage.getItem(key);
+  if (!raw) return fallback;
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    return fallback;
+  }
+}
+
+export function setStorageJson<T>(key: string, value: T): void {
+  localStorage.setItem(key, JSON.stringify(value));
+}
+
+export function debounce<T extends (...args: any[]) => any>(
+  fn: T,
+  delay: number,
+): (...args: Parameters<T>) => void {
+  let timeoutId: ReturnType<typeof setTimeout>;
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => fn(...args), delay);
+  };
+}

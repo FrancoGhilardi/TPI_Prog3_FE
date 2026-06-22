@@ -2,7 +2,8 @@ import "../../../style.css";
 import { requireAuth, logout, getUsuarioActual } from "../../../utils/auth.ts";
 import { getCategorias, getProductos } from "../../../utils/api.ts";
 import { contarItems } from "../../../utils/cart.ts";
-import { escapeHtml, safeImgSrc } from "../../../utils/index.ts";
+import { escapeHtml, safeImgSrc, debounce } from "../../../utils/index.ts";
+import { getEl } from "../../../utils/dom.ts";
 import { ROUTES } from "../../../utils/routes.ts";
 import type { Categoria, Producto } from "../../../types/index.ts";
 
@@ -294,40 +295,40 @@ function renderCategories(): void {
 }
 
 // --- Sidebar (mobile) ---
+const sidebar = getEl("sidebar");
+const sidebarOverlay = getEl("sidebar-overlay");
+
 function openSidebar(): void {
-  document.getElementById("sidebar")!.classList.remove("-translate-x-full");
-  document.getElementById("sidebar-overlay")!.classList.remove("hidden");
+  sidebar.classList.remove("-translate-x-full");
+  sidebarOverlay.classList.remove("hidden");
   document.body.style.overflow = "hidden";
 }
 
 function closeSidebar(): void {
-  document.getElementById("sidebar")!.classList.add("-translate-x-full");
-  document.getElementById("sidebar-overlay")!.classList.add("hidden");
+  sidebar.classList.add("-translate-x-full");
+  sidebarOverlay.classList.add("hidden");
   document.body.style.overflow = "";
 }
 
-document
-  .getElementById("sidebar-toggle")!
-  .addEventListener("click", openSidebar);
-document
-  .getElementById("sidebar-close")!
-  .addEventListener("click", closeSidebar);
-document
-  .getElementById("sidebar-overlay")!
-  .addEventListener("click", closeSidebar);
+getEl("sidebar-toggle").addEventListener("click", openSidebar);
+getEl("sidebar-close").addEventListener("click", closeSidebar);
+sidebarOverlay.addEventListener("click", closeSidebar);
 
 // --- Search ---
+const debouncedSearch = debounce((value: string) => {
+  searchQuery = (value as string).trim();
+  renderProducts();
+}, 300);
+
 function bindSearch(id: string): void {
   const input = document.getElementById(id) as HTMLInputElement | null;
   if (!input) return;
   input.addEventListener("input", () => {
-    searchQuery = input.value.trim();
-    // sync both inputs
     const other =
       id === "search-input" ? "search-input-mobile" : "search-input";
     const otherEl = document.getElementById(other) as HTMLInputElement | null;
     if (otherEl) otherEl.value = input.value;
-    renderProducts();
+    debouncedSearch(input.value);
   });
 }
 

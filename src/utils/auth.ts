@@ -2,6 +2,7 @@ import type { UsuarioSesion } from "../types/index.ts";
 import { getUsuarios } from "./api.ts";
 import { ROUTES } from "./routes.ts";
 import { MESSAGES } from "./messages.ts";
+import { getStorageJson, setStorageJson } from "./index.ts";
 
 const SESSION_KEY = "usuario_sesion";
 
@@ -17,22 +18,16 @@ export async function login(
     throw new Error(MESSAGES.auth.credencialesIncorrectas);
   }
   const { password: _pw, ...sesion } = usuario;
-  localStorage.setItem(SESSION_KEY, JSON.stringify(sesion));
+  setStorageJson(SESSION_KEY, sesion);
   return sesion;
 }
 
 export function loginDirecto(sesion: UsuarioSesion): void {
-  localStorage.setItem(SESSION_KEY, JSON.stringify(sesion));
+  setStorageJson(SESSION_KEY, sesion);
 }
 
 export function getUsuarioActual(): UsuarioSesion | null {
-  const raw = localStorage.getItem(SESSION_KEY);
-  if (!raw) return null;
-  try {
-    return JSON.parse(raw) as UsuarioSesion;
-  } catch {
-    return null;
-  }
+  return getStorageJson<UsuarioSesion | null>(SESSION_KEY, null);
 }
 
 export function logout(): void {

@@ -1,20 +1,15 @@
 import type { ItemCarrito, Producto } from "../types/index.ts";
 import { MESSAGES } from "./messages.ts";
+import { getStorageJson, setStorageJson } from "./index.ts";
 
 const CART_KEY = "carrito";
 
 export function getCarrito(): ItemCarrito[] {
-  const raw = localStorage.getItem(CART_KEY);
-  if (!raw) return [];
-  try {
-    return JSON.parse(raw) as ItemCarrito[];
-  } catch {
-    return [];
-  }
+  return getStorageJson<ItemCarrito[]>(CART_KEY, []);
 }
 
 function saveCarrito(items: ItemCarrito[]): void {
-  localStorage.setItem(CART_KEY, JSON.stringify(items));
+  setStorageJson(CART_KEY, items);
 }
 
 export function agregarItem(producto: Producto, cantidad: number): void {

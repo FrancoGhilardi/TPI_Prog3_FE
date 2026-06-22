@@ -5,7 +5,11 @@ import {
   getCategorias,
   saveProductosLocal,
 } from "../../../utils/api.ts";
-import { escapeHtml, computeNextId } from "../../../utils/index.ts";
+import {
+  escapeHtml,
+  computeNextId,
+  formatPrecio,
+} from "../../../utils/index.ts";
 import { renderAdminLayout, getAdminMain } from "../../../utils/adminLayout.ts";
 import { errorState, skeletonTable } from "../../../utils/ui.ts";
 import { ROUTES } from "../../../utils/routes.ts";
@@ -51,10 +55,6 @@ function wireImageFallbacks(): void {
         img.replaceWith(fallback);
       });
     });
-}
-
-function formatPrice(price: number): string {
-  return `$ ${price.toLocaleString("es-AR")}`;
 }
 
 function disponibleBadge(disponible: boolean): string {
@@ -116,7 +116,7 @@ function renderTable(): void {
                     <td class="py-3 px-4 text-muted hidden xl:table-cell max-w-[200px] truncate">
                       ${p.descripcion ? escapeHtml(p.descripcion) : '<span class="italic text-gray-300">—</span>'}
                     </td>
-                    <td class="py-3 px-4 text-right font-semibold text-secondary tabular-nums">${formatPrice(p.precio)}</td>
+                    <td class="py-3 px-4 text-right font-semibold text-secondary tabular-nums">${formatPrecio(p.precio)}</td>
                     <td class="py-3 px-4">
                       <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-violet-100 text-violet-700">
                         ${escapeHtml(p.categoria.nombre)}
@@ -157,7 +157,7 @@ function renderTable(): void {
                       <p class="font-semibold text-secondary text-sm truncate">${escapeHtml(p.nombre)}</p>
                       <p class="text-xs text-muted mt-0.5 font-mono">#${p.id}</p>
                     </div>
-                    <span class="font-semibold text-secondary text-sm tabular-nums shrink-0">${formatPrice(p.precio)}</span>
+                    <span class="font-semibold text-secondary text-sm tabular-nums shrink-0">${formatPrecio(p.precio)}</span>
                   </div>
                   <div class="flex items-center gap-2 mt-1.5 flex-wrap">
                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-violet-100 text-violet-700">

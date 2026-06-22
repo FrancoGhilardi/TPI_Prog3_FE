@@ -1,6 +1,8 @@
 import "../../../style.css";
 import { login, estaAutenticado, esAdmin } from "../../../utils/auth.ts";
 import { ROUTES } from "../../../utils/routes.ts";
+import { setupPasswordToggle } from "../../../utils/ui.ts";
+import { getEl, getInput, getForm } from "../../../utils/dom.ts";
 
 if (estaAutenticado()) {
   window.location.replace(esAdmin() ? ROUTES.adminHome : ROUTES.storeHome);
@@ -89,30 +91,18 @@ app.innerHTML = `
   </div>
 `;
 
-const form = document.getElementById("login-form") as HTMLFormElement;
-const emailInput = document.getElementById("email") as HTMLInputElement;
-const passwordInput = document.getElementById("password") as HTMLInputElement;
-const errorMsg = document.getElementById("error-msg") as HTMLDivElement;
-const submitBtn = document.getElementById("submit-btn") as HTMLButtonElement;
+const form = getForm("login-form");
+const emailInput = getInput("email");
+const passwordInput = getInput("password");
+const errorMsg = getEl<HTMLDivElement>("error-msg");
+const submitBtn = getEl<HTMLButtonElement>("submit-btn");
 
-const togglePassword = document.getElementById(
-  "toggle-password",
-) as HTMLButtonElement;
-const eyeShow = document.getElementById("eye-show")!;
-const eyeHide = document.getElementById("eye-hide")!;
-
-togglePassword.addEventListener("click", () => {
-  const visible = passwordInput.type === "text";
-  passwordInput.type = visible ? "password" : "text";
-  eyeShow.classList.toggle("hidden", !visible);
-  eyeHide.classList.toggle("hidden", visible);
-  togglePassword.setAttribute("aria-pressed", String(!visible));
-  togglePassword.setAttribute(
-    "aria-label",
-    visible ? "Mostrar contraseña" : "Ocultar contraseña",
-  );
-  passwordInput.focus();
-});
+setupPasswordToggle(
+  getEl<HTMLButtonElement>("toggle-password"),
+  passwordInput,
+  getEl("eye-show"),
+  getEl("eye-hide"),
+);
 
 function showError(msg: string): void {
   errorMsg.textContent = msg;

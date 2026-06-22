@@ -1,5 +1,25 @@
 import { escapeHtml } from "./index.ts";
 
+export function setupPasswordToggle(
+  toggleBtn: HTMLButtonElement,
+  input: HTMLInputElement,
+  eyeShow: HTMLElement,
+  eyeHide: HTMLElement,
+): void {
+  toggleBtn.addEventListener("click", () => {
+    const visible = input.type === "text";
+    input.type = visible ? "password" : "text";
+    eyeShow.classList.toggle("hidden", !visible);
+    eyeHide.classList.toggle("hidden", visible);
+    toggleBtn.setAttribute("aria-pressed", String(!visible));
+    toggleBtn.setAttribute(
+      "aria-label",
+      visible ? "Mostrar contraseña" : "Ocultar contraseña",
+    );
+    input.focus();
+  });
+}
+
 export function errorState(msg: string): string {
   return `
     <div class="flex flex-col items-center justify-center py-24 gap-4">
